@@ -1,0 +1,32 @@
+<section class="page-intro"><p class="eyebrow">PLANEJE COM CLAREZA</p><h1>Do aporte à perspectiva.</h1><p class="lead">Explore um cenário de preço e distribuição constantes. As premissas são hipotéticas, não uma previsão de retorno.</p></section>
+<div class="sim-layout">
+  <section class="panel form-panel"><h2>Seu cenário</h2><p class="muted">Um fundo por simulação · valores em reais</p>
+    @if (loadingFunds()) { <p role="status">Carregando catálogo…</p> }
+    <form [formGroup]="form" (ngSubmit)="simulate()">
+      <label>Fundo<select formControlName="ticker">@for (fund of funds(); track fund.ticker) { <option [value]="fund.ticker">{{ fund.ticker }} · {{ fund.segment }}</option> }</select></label>
+      <label>Investimento inicial (R$)<input type="number" formControlName="initialInvestment" min="0" max="100000000" step="0.01"></label>
+      <label>Aporte mensal (R$)<input type="number" formControlName="monthlyContribution" min="0" max="1000000" step="0.01"></label>
+      <label>Prazo em meses<input type="number" formControlName="months" min="1" max="360" step="1"></label>
+      <label class="check"><input type="checkbox" formControlName="reinvestDistributions">Reinvestir rendimentos</label>
+      @if (form.invalid && form.touched) { <p class="error" role="alert">Use valores não negativos com até duas casas decimais e prazo inteiro de 1 a 360 meses. Inicial máximo: R$ 100 milhões; aporte máximo: R$ 1 milhão.</p> }
+      <button class="full" type="submit" [disabled]="busy() || loadingFunds() || !funds().length">{{ busy() ? 'Calculando…' : 'Simular investimento ↗' }}</button>
+    </form>
+    <p class="footnote">Cotas inteiras. Aportes e reinvestimentos no fim do mês. Sem impostos, custos ou inflação.</p>
+  </section>
+  <section aria-live="polite" aria-label="Resultado da simulação">
+    @if (error()) { <div role="alert" class="error">{{ error() }} @if (!funds().length) { <button (click)="loadFunds()" [disabled]="loadingFunds()">Tentar novamente</button> }</div> }
+    @if (result(); as r) {
+      <div class="summary-grid"><article class="panel metric"><span>Total aportado</span><strong>{{ r.totalContributed | currency:r.currency }}</strong></article><article class="panel metric"><span>Rendimentos acumulados</span><strong>{{ r.totalDistributions | currency:r.currency }}</strong></article><article class="panel metric emphasis"><span>Valor total do cenário</span><strong>{{ r.finalValue | currency:r.currency }}</strong></article></div>
+      <div class="panel result-panel"><div class="section-heading"><h2>Evolução simulada</h2><span class="pill">{{ r.ticker }}</span></div><p class="muted">Cotas + caixa + rendimentos retirados. Valores nominais.</p>
+        <div class="chart" role="img" aria-label="Barras do valor total por mês; valores completos na tabela abaixo">@for (row of chartRows(); track row.month) {
+          <div class="chart-row"><span>M{{ row.month }}</span><div class="bar-track"><div class="bar" [style.width.%]="barWidth(row.totalValue)"></div></div><strong>{{ row.totalValue | currency:r.currency:'symbol':'1.0-0' }}</strong></div>
+        }</div>
+        @if (last(); as end) { <div class="end-state"><span><strong>{{ end.units | number }}</strong> cotas</span><span><strong>{{ end.cash | currency:r.currency }}</strong> em caixa</span><span><strong>{{ end.withdrawn | currency:r.currency }}</strong> retirados</span></div> }
+      </div>
+      <div class="assumptions"><strong>Premissas transparentes</strong><p>Cota fixa: {{ r.fixedPrice | currency:r.currency }} · Distribuição mensal fixa por cota: {{ r.fixedMonthlyDistribution | currency:r.currency }}</p><p>{{ r.assumptions }}</p></div>
+      <details class="panel result-panel"><summary>Ver evolução mês a mês</summary><div class="table-wrap"><table><caption>Detalhamento da simulação em BRL</caption><thead><tr><th scope="col">Mês</th><th scope="col">Cotas</th><th scope="col">Aportado</th><th scope="col">Rendimento do mês</th><th scope="col">Caixa</th><th scope="col">Retirados</th><th scope="col">Total</th></tr></thead><tbody>@for (row of r.timeline; track row.month) { <tr><td>{{ row.month }}</td><td>{{ row.units }}</td><td>{{ row.contributed | currency:r.currency }}</td><td>{{ row.distribution | currency:r.currency }}</td><td>{{ row.cash | currency:r.currency }}</td><td>{{ row.withdrawn | currency:r.currency }}</td><td>{{ row.totalValue | currency:r.currency }}</td></tr> }</tbody></table></div></details>
+    } @else {
+      <div class="empty-simulation panel"><span class="eyebrow">CADA PLANO COMEÇA COM UMA HIPÓTESE</span><div class="empty-art" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><h2>Visualize a evolução<br>do seu investimento.</h2><p>Escolha um fundo, configure os aportes e execute sua primeira simulação.</p></div>
+    }
+  </section>
+</div>

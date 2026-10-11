@@ -1,0 +1,16 @@
+# Build / dependencies
+**/target/
+**/node_modules/
+**/dist/
+**/.angular/
+**/out-tsc/
+# Local secrets and editors
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+*.iml
+*.log
+.DS_Store
+Thumbs.db

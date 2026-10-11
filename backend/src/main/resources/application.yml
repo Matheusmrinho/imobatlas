@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: imobatlas
+  profiles:
+    default: demo
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    locations: classpath:db/migration
+server:
+  port: 8080
+  error:
+    include-message: never
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

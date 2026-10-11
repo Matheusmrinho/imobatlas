@@ -1,0 +1,26 @@
+<section class="hero">
+  <div><p class="eyebrow">UM NOVO OLHAR PARA SUA CARTEIRA</p><h1>Seu próximo investimento.<br><span>Uma perspectiva mais ampla.</span></h1>
+  <p class="lead">Explore fundos pela localização dos imóveis e transforme suas hipóteses em cenários de investimento.</p>
+  <a class="button" routerLink="/simulador">Criar uma simulação <span aria-hidden="true">↗</span></a></div>
+  <aside class="hero-note"><span class="eyebrow">COMO EXPLORAR</span><strong>Onde estão<br>os imóveis?</strong><p>Um fundo pode estar em várias regiões. O filtro considera os imóveis da carteira, não o endereço do investidor.</p><div class="region-dots" aria-hidden="true"><i>N</i><i>NE</i><i>CO</i><i>SE</i><i>S</i></div></aside>
+</section>
+<section aria-labelledby="catalog-title">
+  <div class="section-heading"><div><p class="eyebrow">CATÁLOGO BRASILEIRO</p><h2 id="catalog-title">Explore as possibilidades</h2></div><span class="muted">{{ funds().length }} fundos encontrados</span></div>
+  <form class="filters panel" (ngSubmit)="load()">
+    <label>Nome ou ticker<input name="search" [(ngModel)]="search" placeholder="Busque por DEMO11 ou Logística" maxlength="100"></label>
+    <label>Localização dos imóveis<select name="region" [(ngModel)]="region"><option value="">Todas as regiões</option>@for (r of regions; track r.value) { <option [value]="r.value">{{ r.label }}</option> }</select></label>
+    <button type="submit" [disabled]="loading()">Aplicar filtros</button><button class="secondary" type="button" (click)="clear()" [disabled]="loading()">Limpar</button>
+  </form>
+  @if (error()) { <div role="alert" class="error">{{ error() }} <button class="secondary" (click)="load()">Tentar novamente</button></div> }
+  @if (loading()) { <p role="status" class="empty">Carregando fundos…</p> }
+  @if (!loading() && !error()) {
+    <div class="fund-grid">@for (fund of funds(); track fund.ticker) {
+      <article class="fund-card panel"><div class="card-top"><span class="ticker">{{ fund.ticker }}</span><span class="pill">{{ fund.segment }}</span></div>
+        <h3>{{ fund.name }}</h3><p class="places">{{ places(fund) }}</p>
+        <div class="numbers"><div><span>Cota fictícia</span><strong>{{ fund.price | currency:fund.currency }}</strong></div><div><span>Distribuição mensal / cota</span><strong>{{ fund.monthlyDistribution | currency:fund.currency }}</strong></div></div>
+        <details><summary>Imóveis da carteira</summary><ul>@for (property of fund.properties; track property.id) { <li>{{ property.name }}<small>{{ property.city }} · {{ property.state }}</small></li> }</ul></details>
+        <div class="card-bottom"><small>Base: {{ fund.asOf | date:'dd/MM/yyyy' }}<br>{{ fund.source }}</small><a [routerLink]="['/simulador']" [queryParams]="{ticker:fund.ticker}" class="text-link">Simular ↗</a></div>
+      </article>
+    } @empty { <div class="empty panel"><h3>Nenhum fundo encontrado</h3><p>Experimente outra região ou limpe os filtros.</p></div> }</div>
+  }
+</section>
